@@ -61,6 +61,7 @@ sudo iconsur cache
 
 ## Known Issues
 
+- The iOS app search is provided by the App Store (America) which means some apps, although existing, may not be found. Currently there's no point in changing this for me myself because the App Store (China) does not provide the very search page to get the same thing done.
 - During generation of local adaptive icons, some original `.icns` file may be created in bad or unsupported formats, which will raise an error, for example `No icon was found in file AppIcon.icns` or `Unsupported MIME type: image/jp2`.
 
 ## Credits
