@@ -116,7 +116,7 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
         process.exit(1);
       }
       const originalIcon = (await jimp.read(iconBuffer)).resize(iconSize * originalIconScaleSize, iconSize * originalIconScaleSize);
-      resultIcon = (await jimp.create(iconSize, iconSize, program.color || '#ffffff')).mask(mask, 0, 0).composite(originalIcon, scalePosition, scalePosition);
+      resultIcon = (await jimp.create(iconSize, iconSize, program.color || '#ffffff')).composite(originalIcon, scalePosition, scalePosition).mask(mask, 0, 0);
     }
   
     const image = (await jimp.create(imageSize, imageSize, 0)).composite(resultIcon, iconPadding, iconPadding);
