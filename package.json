@@ -1,0 +1,22 @@
+{
+  "name": "iconsur",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "license": "MIT",
+  "bin": {
+    "iconsur": "src/index.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "commander": "^5.1.0",
+    "glob": "^7.1.6",
+    "icns-lib": "^1.0.1",
+    "jimp": "^0.13.0",
+    "node-fetch": "^2.6.0",
+    "plist": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/commander": "^2.12.2",
+    "@types/node": "^14.0.14"
+  }
+}
