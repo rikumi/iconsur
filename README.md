@@ -35,20 +35,20 @@ This will search for the App Store and use the most related iOS App. For Apps fr
 
 By default, the name for the macOS App is used to search for a corresponding iOS App. You can change the keyword by specifying `-n`/`--name`.
 
-For Apps that does not have a corresponding iOS App, an irrelevant App may be found. In these cases, you may need to specify the `-a`/`--alternative` option to forcibly generate an adaptive icon:
+For Apps that does not have a corresponding iOS App, an irrelevant App may be found. In these cases, you may need to specify the `-l`/`--local` option to forcibly generate an icon locally:
 
 ```sh
-sudo iconsur set /Applications/Visual\ Studio\ Code.app/ -a
+sudo iconsur set /Applications/Visual\ Studio\ Code.app/ -l
 sudo iconsur cache
 ```
 
-By default, the original App icon is scaled by 0.9 and is applied to a white background. You may like to change the scaling and background color of the adaptive icon:
+By default, the original App icon is scaled by 0.9 and is applied to a white background. You may like to change the scaling and background color of the icon:
 
 ```sh
-sudo iconsur set /Applications/Visual\ Studio\ Code.app/ -a -s 0.8 -c 87cdf0
+sudo iconsur set /Applications/Visual\ Studio\ Code.app/ -l -s 0.8 -c 87cdf0
 sudo iconsur cache
 ```
 
 ## Known Issues
 
-- During generation of adaptive icons, some original `.icns` file may be created in bad formats which will raise an error, such as `No icon was found in file AppIcon.icns` or `Unsupported MIME type: image/jp2`.
+- During generation of local adaptive icons, some original `.icns` file may be created in bad formats which will raise an error, such as `No icon was found in file AppIcon.icns` or `Unsupported MIME type: image/jp2`.

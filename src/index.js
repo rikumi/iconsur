@@ -22,7 +22,7 @@ process.on('uncaughtException', (e) => {
 
 program.name('iconsur');
 program.version(version);
-program.option('-a, --adaptive', 'Directly create adaptive icon without searching for an iOS App');
+program.option('-l, --local', 'Directly create an icon locally without searching for an iOS App');
 program.option('-k, --keyword <keyword>', 'Specify custom keyword to search for an iOS App');
 program.option('-s, --scale <float>', 'Specify scale for adaptive icon (default: 0.9)');
 program.option('-c, --color <hex>', 'Specify color for adaptive icon (default: ffffff)');
@@ -78,7 +78,7 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
     let resultIcon;
     let iOSApp = null;
   
-    if (!program.adaptive) {
+    if (!program.local) {
       console.log(`Searching iOS App with name: ${appName}`);
       const res = await fetch(`https://www.apple.com/search/${encodeURIComponent(appName)}?page=1&sel=explore&src=globalnav`);
       const $ = cheerio.load(await res.text());
@@ -89,13 +89,13 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
       const appName = iOSApp.find('.as-productname').eq(0).text();
       const iconUrl = iOSApp.find('.as-explore-img').eq(0).attr('src');
       console.log(`Found iOS app: ${appName} with icon: ${iconUrl}`);
-      console.log(`If this app is incorrect, specify the correct name with -k or --keyword, or generate an adaptive icon with option -a or --adaptive`);
+      console.log(`If this app is incorrect, specify the correct name with -k or --keyword, or generate an icon locally with option -l or --local`);
       const res = await fetch(iconUrl);
       const iconData = await res.buffer();
       const unmaskedImage = (await jimp.read(iconData)).resize(iconSize, iconSize);
       resultIcon = unmaskedImage.mask(mask, 0, 0);
     } else {
-      if (!program.adaptive) {
+      if (!program.local) {
         console.log(`Cannot find iOS App with name: ${appName}`);
       }
 
