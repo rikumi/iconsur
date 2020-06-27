@@ -59,4 +59,4 @@ sudo iconsur cache
 
 ## Known Issues
 
-- During generation of local adaptive icons, some original `.icns` file may be created in bad formats which will raise an error, such as `No icon was found in file AppIcon.icns` or `Unsupported MIME type: image/jp2`.
+- During generation of local adaptive icons, some original `.icns` file may be created in bad or unsupported formats, which will raise an error, for example `No icon was found in file AppIcon.icns` or `Unsupported MIME type: image/jp2`.
