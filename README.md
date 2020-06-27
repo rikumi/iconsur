@@ -6,7 +6,7 @@
 
 The generation is based on the most related iOS app from the App Store, or, if there isn't one, is created from the original icon, in which case the background color and the scaling can be customized.
 
-![image](https://user-images.githubusercontent.com/5051300/85924963-3b889c00-b8c8-11ea-957a-bf10f5efa068.png)
+![image](https://user-images.githubusercontent.com/5051300/85926574-ebfb9d80-b8d2-11ea-836b-28e38d1f3447.png)
 
 ## Usage
 
