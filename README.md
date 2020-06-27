@@ -1,5 +1,7 @@
 # Icon Sur: macOS Big Sur Adaptive Icon Generator
 
+![](https://img.shields.io/npm/v/iconsur) ![](https://img.shields.io/github/last-commit/rikumi/iconsur)
+
 `iconsur` is a command line tool to easily generate macOS Big Sur styled adaptive icons for third-party apps.
 
 The generation is based on the most related iOS app from the App Store, or, if there isn't one, is created from the original icon, in which case the background color and the scaling can be customized.
