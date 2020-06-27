@@ -60,3 +60,7 @@ sudo iconsur cache
 ## Known Issues
 
 - During generation of local adaptive icons, some original `.icns` file may be created in bad or unsupported formats, which will raise an error, for example `No icon was found in file AppIcon.icns` or `Unsupported MIME type: image/jp2`.
+
+## Credits
+
+Thanks to [LiteIcon](https://freemacsoft.net/liteicon/) for the original inspiration, and [fileicon by mklement0](https://github.com/mklement0/fileicon) for the script for icon customization.
