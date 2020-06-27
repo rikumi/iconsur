@@ -35,7 +35,7 @@ sudo iconsur cache
 
 This will search for the App Store and use the most related iOS App. For apps from the Mac App Store, `sudo` is required to set the alternative icon.
 
-By default, the name for the macOS App is used to search for a corresponding iOS App. You can change the keyword by specifying `-n`/`--name`.
+By default, the name for the macOS App is used to search for a corresponding iOS App. You can change the keyword by specifying `-k`/`--keyword`.
 
 For apps that does not have a corresponding iOS App, an irrelevant app may be found. In these cases, you may need to specify the `-l`/`--local` option to forcibly generate an icon locally:
 
