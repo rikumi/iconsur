@@ -12,7 +12,7 @@ jobs:
         node-version: 10.x
     - run: npm install
     - run: npm run build
-#     - run: npm publish
+    - run: npm publish
     - uses: nyaascii/package-version@v1.0.0
     - uses: actions/create-release@v1.1.1
       id: create_release
