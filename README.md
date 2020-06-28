@@ -1,4 +1,4 @@
-# Icon Sur: macOS Big Sur Adaptive Icon Generator
+# IconSur: macOS Big Sur Adaptive Icon Generator
 
 ![](https://img.shields.io/npm/v/iconsur) ![](https://img.shields.io/github/last-commit/rikumi/iconsur)
 
@@ -51,7 +51,14 @@ sudo iconsur set /Applications/Visual\ Studio\ Code.app/ -l
 sudo iconsur cache
 ```
 
-By default, the original app icon is scaled by 0.9 and is applied to a white background. You may like to change the scaling and background color of the icon:
+You can also use your own original icon with the `-i`/`--input` option. Here IconSur plays the part of adding the background, masking the icon into continuous corners, and adding correct paddings around the masked icon.
+
+```sh
+sudo iconsur set /Applications/Visual\ Studio\ Code.app/ -l -i /path/to/your/icon
+sudo iconsur cache
+```
+
+By default, the original app icon is scaled by 0.9 and is applied to a white background. You may like to change the scaling and background color of the icon. However, if the original icon is opaque, it will not get scaled down in case you specify an original opaque iOS icon from an app developer or a jailbreak icon pack.
 
 ```sh
 sudo iconsur set /Applications/Visual\ Studio\ Code.app/ -l -s 0.8 -c 87cdf0

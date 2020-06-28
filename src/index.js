@@ -26,6 +26,7 @@ program.option('-k, --keyword <keyword>', 'Specify custom keyword to search for 
 program.option('-r, --region <region>', 'Specify country or region to search (default: us)');
 program.option('-s, --scale <float>', 'Specify scale for adaptive icon (default: 0.9)');
 program.option('-c, --color <hex>', 'Specify color for adaptive icon (default: ffffff)');
+program.option('-i, --input <path>', 'Specify custom input image for adaptive icon');
 
 program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
   if (!otherDirs.length && ~dir.indexOf('*')) {
@@ -47,7 +48,7 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
     }
     
     let appName = program.keyword;
-    let srcIconFile;
+    let srcIconFile = program.input;
     
     try {
       const infoPlist = path.join(appDir, 'Contents/Info.plist');
@@ -55,25 +56,28 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
       if (!appName) {
         appName = infoPlistContents['CFBundleDisplayName'] || path.basename(appDir).replace(/\.app$/, '');
       }
-      srcIconFile = path.resolve(appDir, 'Contents/Resources', infoPlistContents['CFBundleIconFile']);
-      if (!/\.icns$/.test(srcIconFile)) {
-        srcIconFile += '.icns';
+      if (!srcIconFile) {
+        srcIconFile = path.resolve(appDir, 'Contents/Resources', infoPlistContents['CFBundleIconFile']);
+        if (!/\.icns$/.test(srcIconFile)) {
+          srcIconFile += '.icns';
+        }
       }
     } catch (e) {
-      if (!program.keyword) {
-        console.log(`Plist file might be corrupted; using fallback name and AppIcon.icns as default icon location.`);
-        console.log('Re-run with option -n or --name to specify custom app name to search for.');
-      } else {
-        console.log(`Plist file might be corrupted; using AppIcon.icns as default icon location.`);
+      console.log(`Plist file might be corrupted; using fallback name and AppIcon.icns as default icon location.`);
+      console.log('Re-run with option -k or --keyword to specify custom app name to search for.');
+      console.log('Re-run with option -i or --input to specify custom input image for an adaptive icon.');
+
+      if (!appName) {
+        appName = path.basename(appDir).replace(/\.app$/, '');
       }
-      appName = path.basename(appDir).replace(/\.app$/, '');
-      srcIconFile = path.resolve(appDir, 'Contents/Resources/AppIcon.icns');
+      if (!srcIconFile) {
+        srcIconFile = path.resolve(appDir, 'Contents/Resources/AppIcon.icns');
+      }
     }
     
     const imageSize = 256;
     const iconPadding = Math.floor(imageSize * 0.1);
     const iconSize = imageSize - 2 * iconPadding;
-    const originalIconScaleSize = parseFloat(program.scale || '0.9');
     const mask = (await jimp.read(path.resolve(__dirname, 'mask.png'))).resize(iconSize, iconSize);
     const region = program.region || 'us';
     let resultIcon;
@@ -106,17 +110,39 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
         process.exit(1);
       }
       
-      const scalePosition = iconSize * (1 - originalIconScaleSize) / 2;
-      const iconBuffer = Object.entries(icns.parse(fs.readFileSync(srcIconFile)))
-        .filter(([k]) => icns.isImageType(k))
-        .map(([, v]) => v)
-        .sort((a, b) => b.length - a.length)[0];
+      let iconBuffer = fs.readFileSync(srcIconFile);
+
+      try {
+        const subIconBuffer = Object.entries(icns.parse(iconBuffer))
+          .filter(([k]) => icns.isImageType(k))
+          .map(([, v]) => v)
+          .sort((a, b) => b.length - a.length)[0];
+        
+        if (subIconBuffer) {
+          iconBuffer = subIconBuffer;
+        }
+      } catch (e) {}
       
-      if (!iconBuffer) {
-        console.error(`No icon was found in file ${srcIconFile}`);
+      let originalIcon;
+      try {
+        originalIcon = await jimp.read(iconBuffer);
+      } catch (e) {
+        console.error(`Failed to read original icon: ${e.message}`);
+        console.error('Re-run with option -i or --input to use a custom image for generation.');
         process.exit(1);
       }
-      const originalIcon = (await jimp.read(iconBuffer)).resize(iconSize * originalIconScaleSize, iconSize * originalIconScaleSize);
+
+      let originalIconScaleSize;
+      if (originalIcon.hasAlpha()) {
+        originalIconScaleSize = parseFloat(program.scale || '0.9');
+        originalIcon.contain(iconSize * originalIconScaleSize, iconSize * originalIconScaleSize);
+      } else {
+        console.log('The original icon image is opaque; thus it will not be scaled down.')
+        originalIconScaleSize = 1;
+        originalIcon.cover(iconSize, iconSize);
+      }
+
+      const scalePosition = iconSize * (1 - originalIconScaleSize) / 2;
       resultIcon = (await jimp.create(iconSize, iconSize, program.color || '#ffffff')).composite(originalIcon, scalePosition, scalePosition).mask(mask, 0, 0);
     }
   
