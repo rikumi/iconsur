@@ -33,11 +33,18 @@ sudo iconsur cache
 # Then the new icon will appear, and will last until the App is updated next time.
 ```
 
-This will search for the App Store and use the most related iOS App. For apps from the Mac App Store, `sudo` is required to set the alternative icon.
+This will search for the App Store and use the most related iOS app. For apps from the Mac App Store, `sudo` is required to set the alternative icon.
 
-By default, the name for the macOS App is used to search for a corresponding iOS App. You can change the keyword by specifying `-k`/`--keyword`.
+By default, the name for the macOS app is used to search for a corresponding iOS app. You can change the keyword by specifying `-k`/`--keyword`.
 
-For apps that does not have a corresponding iOS App, an irrelevant app may be found. In these cases, you may need to specify the `-l`/`--local` option to forcibly generate an icon locally:
+If your app only has a corresponding iOS app in non-America store, you may like to specify the 2-letter country code with option `-r`/`--region`.
+
+```sh
+sudo iconsur set /Applications/QQMusic.app/ -r hk
+sudo iconsur cache
+```
+
+For apps that does not have a corresponding iOS app, an irrelevant app may be found. In these cases, you may need to specify the `-l`/`--local` option to forcibly generate an icon locally:
 
 ```sh
 sudo iconsur set /Applications/Visual\ Studio\ Code.app/ -l
@@ -61,7 +68,6 @@ sudo iconsur cache
 
 ## Known Issues
 
-- The iOS app search is provided by the App Store (America) which means some apps, although existing, may not be found. Currently there's no point in changing this for me myself because the App Store (China) does not provide the very search page to get the same thing done.
 - During generation of local adaptive icons, some original `.icns` files that were created in bad or unsupported formats, will raise an error, for example `No icon was found in file AppIcon.icns` or `Unsupported MIME type: image/jp2`.
 
 ## Credits
