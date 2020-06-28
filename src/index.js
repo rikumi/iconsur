@@ -49,6 +49,9 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
     
     let appName = program.keyword;
     let srcIconFile = program.input;
+    if (program.input) {
+      program.local = true;
+    }
     
     try {
       const infoPlist = path.join(appDir, 'Contents/Info.plist');

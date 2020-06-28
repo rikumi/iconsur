@@ -44,7 +44,7 @@ sudo iconsur set /Applications/QQMusic.app/ -r cn
 sudo iconsur cache
 ```
 
-For apps that does not have a corresponding iOS app, an irrelevant app may be found. In these cases, you may need to specify the `-l`/`--local` option to forcibly generate an icon locally:
+For apps that does not have a corresponding iOS app, an irrelevant app can be found. In these cases, you may need to specify the `-l`/`--local` option to forcibly generate an icon locally:
 
 ```sh
 sudo iconsur set /Applications/Visual\ Studio\ Code.app/ -l
