@@ -13,6 +13,13 @@ const { default: fetch } = require('node-fetch');
 
 const { version } = require('../package.json');
 
+const fileicon = path.join(os.tmpdir(), `fileicon-${Math.random().toFixed(16).substr(2, 6)}.sh`);
+const fileiconBinaryReady = new Promise(resolve => {
+  fs.createReadStream(path.join(__dirname, 'fileicon.sh'))
+    .pipe(fs.createWriteStream(fileicon), { end: true })
+    .on('close', resolve);
+}).then(() => cp.spawnSync('chmod', ['+x', fileicon]));
+
 process.on('unhandledRejection', (e) => { throw e });
 process.on('uncaughtException', (e) => {
   console.error('Error:', e.message);
@@ -81,7 +88,7 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
     const imageSize = 256;
     const iconPadding = Math.floor(imageSize * 0.1);
     const iconSize = imageSize - 2 * iconPadding;
-    const mask = (await jimp.read(path.resolve(__dirname, 'mask.png'))).resize(iconSize, iconSize);
+    const mask = (await jimp.read(path.join(__dirname, 'mask.png'))).resize(iconSize, iconSize);
     const region = program.region || 'us';
     let resultIcon;
     let data = null;
@@ -153,7 +160,8 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
     const tmpFile = path.resolve(os.tmpdir(), `tmp-${Math.random().toFixed(16).substr(2, 6)}.png`);
     await image.writeAsync(tmpFile);
   
-    const { status } = cp.spawnSync(path.join(__dirname, 'fileicon.sh'), ['set', appDir, tmpFile], { stdio: 'inherit' });
+    await fileiconBinaryReady;
+    const { status } = cp.spawnSync(fileicon, ['set', appDir, tmpFile], { stdio: 'inherit' });
     if (status) {
       console.error(`Failed to set custom icon: fileicon script exited with error ${status}`);
       process.exit(1);
@@ -168,8 +176,9 @@ program.command('unset <dir> [otherDirs...]').action(async (dir, otherDirs) => {
     [dir, ...otherDirs] = glob.sync(dir);
   }
 
+  await fileiconBinaryReady;
   for (let appDir of [dir, ...otherDirs]) {
-    const { status } = cp.spawnSync(path.join(__dirname, 'fileicon.sh'), ['rm', appDir], { stdio: 'inherit' });
+    const { status } = cp.spawnSync(fileicon, ['rm', appDir], { stdio: 'inherit' });
     if (status) {
       console.error(`Failed to remove custom icon: fileicon script exited with error ${status}`);
       process.exit(1);
