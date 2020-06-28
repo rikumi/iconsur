@@ -26,3 +26,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: dist/iconsur
         asset_name: iconsur
+        asset_content_type: application/octet-stream

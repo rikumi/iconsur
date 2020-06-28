@@ -1,6 +1,6 @@
 {
   "name": "iconsur",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "main": "src/index.js",
   "license": "MIT",
   "scripts": {
@@ -21,7 +21,6 @@
     "plist": "^3.0.1"
   },
   "devDependencies": {
-    "@types/commander": "^2.12.2",
     "@types/node": "^14.0.14",
     "pkg": "^4.4.8"
   }
