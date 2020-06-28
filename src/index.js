@@ -80,7 +80,8 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
   
     if (!program.local) {
       console.log(`Searching iOS App with name: ${appName}`);
-      const res = await fetch(`https://www.apple.com/search/${encodeURIComponent(appName)}?page=1&sel=explore&src=globalnav`);
+      const safeName = encodeURIComponent(appName.replace(/\s+/g, '-'));
+      const res = await fetch(`https://www.apple.com/search/${safeName}?page=1&sel=explore&src=globalnav`);
       const $ = cheerio.load(await res.text());
       iOSApp = $('.as-explore-product');
     }
