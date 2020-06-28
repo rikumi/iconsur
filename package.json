@@ -1,6 +1,6 @@
 {
   "name": "iconsur",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "src/index.js",
   "license": "MIT",
   "bin": {
@@ -10,7 +10,6 @@
     "url": "https://github.com/rikumi/iconsur"
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.3",
     "commander": "^5.1.0",
     "glob": "^7.1.6",
     "icns-lib": "^1.0.1",

@@ -8,7 +8,6 @@ const glob = require('glob');
 const jimp = require('jimp');
 const plist = require('plist');
 const icns = require('icns-lib');
-const cheerio = require('cheerio');
 const { program } = require('commander');
 const { default: fetch } = require('node-fetch');
 
