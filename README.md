@@ -40,7 +40,7 @@ By default, the name for the macOS app is used to search for a corresponding iOS
 If your app only has a corresponding iOS app in non-America store, you may like to specify the 2-letter country code with option `-r`/`--region`.
 
 ```sh
-sudo iconsur set /Applications/QQMusic.app/ -r hk
+sudo iconsur set /Applications/QQMusic.app/ -r cn
 sudo iconsur cache
 ```
 
