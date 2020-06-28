@@ -10,7 +10,7 @@ The generation is based on the most related iOS app from the App Store, or, if t
 
 ## Usage
 
-Download the `iconsur` binary for macOS x64 from [Releases](https://github.com/rikumi/iconsur/releases) and include it in your PATH.
+Download the `iconsur` binary for macOS x64 from [Releases](https://github.com/rikumi/iconsur/releases), `chmod +x` and include it in your PATH.
 
 Start generating your first adaptive app icon:
 
