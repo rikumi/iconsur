@@ -63,9 +63,14 @@ sudo iconsur unset /Applications/Visual\ Studio\ Code.app/
 sudo iconsur cache
 ```
 
+## Example
+
+See [my personal iconsur setup](https://gist.github.com/rikumi/e2ac39882a7dcd29642f29343da5a54a) as an example.
+
 ## Known Issues
 
 - During generation of local adaptive icons, some original `.icns` files that were created in bad or unsupported formats, will raise an error, for example `No icon was found in file AppIcon.icns` or `Unsupported MIME type: image/jp2`.
+- I used the `plist` package which only supports XML-formatted plist files but not binary ones as intended. As a result, binary plist files can lead to parsing errors.
 
 ## Credits
 
