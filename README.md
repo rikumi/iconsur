@@ -1,6 +1,14 @@
+<span align="center">
+  
 # IconSur: macOS Big Sur Adaptive Icon Generator
 
-![](https://img.shields.io/npm/v/iconsur) ![](https://img.shields.io/github/last-commit/rikumi/iconsur)
+<a href="https://www.npmjs.com/package/iconsur"><img title="npm version" src="https://badgen.net/npm/v/iconsur" ></a>
+<a href="https://www.npmjs.com/package/iconsur"><img title="npm downloads" src="https://badgen.net/npm/dt/iconsur" ></a>
+<a href="https://github.com/rikumi/iconsur/commit"><img title="github commits" src="https://badgen.net/github/last-commit/rikumi/iconsur" ></a>
+
+</p>
+
+</span>
 
 `iconsur` is a command line tool to easily generate macOS Big Sur styled adaptive icons for third-party apps.
 
