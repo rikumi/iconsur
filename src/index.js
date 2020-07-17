@@ -13,6 +13,17 @@ const { default: fetch } = require('node-fetch');
 
 const { version } = require('../package.json');
 
+jimp.decoders['image/jp2'] = (buffer) => {
+  const { width, height, data } = require('./openjpeg')(buffer, 'jp2');
+
+  // Convert Planar RGB into Pixel RGB
+  const rgbaBuffer = Buffer.alloc(data.length);
+  for (let i = 0; i < data.length; i++) {
+    rgbaBuffer[i] = data[(data.length / 4) * (i % 4) + Math.round(i / 4)] || 0;
+  }
+  return { width, height, data: rgbaBuffer };
+};
+
 const fileicon = path.join(os.tmpdir(), `fileicon-${Math.random().toFixed(16).substr(2, 6)}.sh`);
 const fileiconBinaryReady = new Promise(resolve => {
   fs.createReadStream(path.join(__dirname, 'fileicon.sh'))
