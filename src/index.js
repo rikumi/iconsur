@@ -74,7 +74,12 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
     
     try {
       const infoPlist = path.join(appDir, 'Contents/Info.plist');
-      const infoPlistContents = plist.parse(fs.readFileSync(infoPlist, 'utf-8'));
+
+      // Convert potentially binary plist to xml format
+      const convertedPlist = path.resolve(os.tmpdir(), `tmp-${Math.random().toFixed(16).substr(2, 6)}.plist`);
+      cp.spawnSync('plutil', ['-convert', 'xml1', '-o', convertedPlist, '--', infoPlist]);
+
+      const infoPlistContents = plist.parse(fs.readFileSync(convertedPlist, 'utf-8'));
       if (!appName) {
         appName = infoPlistContents['CFBundleDisplayName'] || path.basename(appDir).replace(/\.app$/, '');
       }

@@ -67,10 +67,6 @@ sudo iconsur cache
 
 See [my personal iconsur setup](https://gist.github.com/rikumi/e2ac39882a7dcd29642f29343da5a54a) as an example.
 
-## Known Issues
-
-- I used the `plist` package which only supports XML-formatted plist files but not binary ones as intended. As a result, binary plist files can lead to parsing errors.
-
 ## Credits
 
 Thanks to [LiteIcon](https://freemacsoft.net/liteicon/) for the original inspiration, and [fileicon by mklement0](https://github.com/mklement0/fileicon) for the script for icon customization.
