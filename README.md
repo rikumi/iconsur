@@ -69,7 +69,6 @@ See [my personal iconsur setup](https://gist.github.com/rikumi/e2ac39882a7dcd296
 
 ## Known Issues
 
-- During generation of local adaptive icons, some original `.icns` files that were created in bad or unsupported formats, will raise an error, for example `No icon was found in file AppIcon.icns` or `Unsupported MIME type: image/jp2`.
 - I used the `plist` package which only supports XML-formatted plist files but not binary ones as intended. As a result, binary plist files can lead to parsing errors.
 
 ## Credits
