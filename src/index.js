@@ -11,10 +11,11 @@ const icns = require('icns-lib');
 const { program } = require('commander');
 const { default: fetch } = require('node-fetch');
 
+const jpeg = require('./openjpeg');
 const { version } = require('../package.json');
 
 jimp.decoders['image/jp2'] = (buffer) => {
-  const { width, height, data } = require('./openjpeg')(buffer, 'jp2');
+  const { width, height, data } = jpeg(buffer, 'jp2');
 
   // Convert Planar RGB into Pixel RGB
   const rgbaBuffer = Buffer.alloc(data.length);
