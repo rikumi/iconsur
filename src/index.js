@@ -46,6 +46,7 @@ program.option('-r, --region <region>', 'Specify country or region to search (de
 program.option('-s, --scale <float>', 'Specify scale for adaptive icon (default: 0.9)');
 program.option('-c, --color <hex>', 'Specify color for adaptive icon (default: ffffff)');
 program.option('-i, --input <path>', 'Specify custom input image for adaptive icon');
+program.option('-o, --output <path>', 'Write the generated icon to a file without actually applying to App');
 
 program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
   if (!otherDirs.length && ~dir.indexOf('*')) {
@@ -174,17 +175,23 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
     }
   
     const image = (await jimp.create(imageSize, imageSize, 0)).composite(resultIcon, iconPadding, iconPadding);
-    const tmpFile = path.resolve(os.tmpdir(), `tmp-${Math.random().toFixed(16).substr(2, 6)}.png`);
-    await image.writeAsync(tmpFile);
-  
-    await fileiconBinaryReady;
-    const { status } = cp.spawnSync(fileicon, ['set', appDir, tmpFile], { stdio: 'inherit' });
-    if (status) {
-      console.error(`Failed to set custom icon: fileicon script exited with error ${status}`);
-      process.exit(1);
-    }
 
-    console.log(`Successfully set icon for ${appDir}\n`);
+    if (program.output) {
+      program.output = String(program.output).replace(/(\..*)?$/, '.png');
+      await image.writeAsync(program.output);
+      console.log(`Successfully saved icon for ${appDir} at ${program.output}\n`);
+    } else {
+      const tmpFile = path.resolve(os.tmpdir(), `tmp-${Math.random().toFixed(16).substr(2, 6)}.png`);
+      await image.writeAsync(tmpFile);
+    
+      await fileiconBinaryReady;
+      const { status } = cp.spawnSync(fileicon, ['set', appDir, tmpFile], { stdio: 'inherit' });
+      if (status) {
+        console.error(`Failed to set custom icon: fileicon script exited with error ${status}`);
+        process.exit(1);
+      }
+      console.log(`Successfully set icon for ${appDir}\n`);
+    }
   };
 });
 
