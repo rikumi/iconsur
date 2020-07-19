@@ -103,10 +103,10 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
       }
     }
     
-    const imageSize = 256;
-    const iconPadding = Math.floor(imageSize * 0.1);
+    const imageSize = 1024;
+    const iconPadding = 100;
     const iconSize = imageSize - 2 * iconPadding;
-    const mask = (await jimp.read(path.join(__dirname, 'mask.png'))).resize(iconSize, iconSize);
+    const mask = (await jimp.read(path.join(__dirname, 'mask.png'))).resize(imageSize, imageSize);
     const region = program.region || 'us';
     let resultIcon;
     let data = null;
@@ -125,8 +125,7 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
       console.log(`If this app is incorrect, specify the correct name with -k or --keyword, or generate an icon locally with option -l or --local`);
       const res = await fetch(iconUrl);
       const iconData = await res.buffer();
-      const unmaskedImage = (await jimp.read(iconData)).resize(iconSize, iconSize);
-      resultIcon = unmaskedImage.mask(mask, 0, 0);
+      resultIcon = (await jimp.read(iconData)).resize(iconSize, iconSize);
     } else {
       if (!program.local) {
         console.log(`Cannot find iOS App with name: ${appName}`);
@@ -171,10 +170,15 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
       }
 
       const scalePosition = iconSize * (1 - originalIconScaleSize) / 2;
-      resultIcon = (await jimp.create(iconSize, iconSize, program.color || '#ffffff')).composite(originalIcon, scalePosition, scalePosition).mask(mask, 0, 0);
+      resultIcon = (await jimp.create(iconSize, iconSize)).composite(originalIcon, scalePosition, scalePosition);
     }
   
-    const image = (await jimp.create(imageSize, imageSize, 0)).composite(resultIcon, iconPadding, iconPadding);
+    const image = (await jimp.create(imageSize, imageSize, program.color || '#ffffff')).composite(resultIcon, iconPadding, iconPadding);
+
+    // The masking algorithm that is both alpha- and color-friendly and full of magic
+    image.scan(0, 0, imageSize, imageSize, (x, y) => {
+      image.setPixelColor((mask.getPixelColor(x, y) & image.getPixelColor(x, y)) >>> 0, x, y);
+    });
 
     if (program.output) {
       program.output = String(program.output).replace(/(\..*)?$/, '.png');
