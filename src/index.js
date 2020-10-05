@@ -216,16 +216,25 @@ program.command('unset <dir> [otherDirs...]').action(async (dir, otherDirs) => {
 
 program.command('cache').action(() => {
   try {
-    cp.execSync('sudo rm -rf /Library/Caches/com.apple.iconservices.store', { stdio: 'inherit' });
+    cp.execSync('sudo rm -rf /Library/Caches/com.apple.iconservices.store', { stdio: 'ignore' });
   } catch (e) { }
   
   try {
-    cp.execSync('sudo find /private/var/folders/ \\( -name com.apple.dock.iconcache -or -name com.apple.iconservices \\) -exec rm -rf {} \\;', { stdio: 'inherit' });
+    cp.execSync('sudo find /private/var/folders/ \\( -name com.apple.dock.iconcache -or -name com.apple.iconservices \\) -exec rm -rf {} \\;', { stdio: 'ignore' });
   } catch (e) { }
   
-  cp.execSync('sleep 3; sudo touch /Applications/*', { stdio: 'inherit' });
-  cp.execSync('killall Dock', { stdio: 'inherit' });
-  cp.execSync('killall Finder', { stdio: 'inherit' });
+  try {
+    cp.execSync('sleep 3; sudo touch /Applications/*', { stdio: 'ignore' });
+  } catch (e) { }
+  
+  try {
+    cp.execSync('killall Dock', { stdio: 'ignore' });
+  } catch (e) { }
+  
+  try {
+    cp.execSync('killall Finder', { stdio: 'ignore' });
+  } catch (e) { }
+  
   process.exit();
 });
 
