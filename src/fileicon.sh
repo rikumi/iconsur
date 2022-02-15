@@ -200,7 +200,7 @@ setCustomIcon() {
   # !!
   # !! Note: setIcon_forFile_options_() seemingly always indicates True, even with invalid image files, so
   # !!       we attempt no error handling in the Python code.
-  /usr/bin/python - "$imgFile" "$fileOrFolder" <<'EOF' || return
+  /usr/bin/python3 - "$imgFile" "$fileOrFolder" <<'EOF' || return
 import Cocoa
 import sys
 
