@@ -48,7 +48,7 @@ openUrl() {
 
 # Prints the embedded Markdown-formatted man-page source to stdout.
 printManPageSource() {
-  /usr/bin/sed -n -e $'/^: <<\'EOF_MAN_PAGE\'/,/^EOF_MAN_PAGE/ { s///; t\np;}' "$BASH_SOURCE"
+  sed -n -e $'/^: <<\'EOF_MAN_PAGE\'/,/^EOF_MAN_PAGE/ { s///; t\np;}' "$BASH_SOURCE"
 }
 
 # Opens the man page, if installed; otherwise, tries to display the embedded Markdown-formatted man-page source; if all else fails: tries to display the man page online.
@@ -71,7 +71,7 @@ openManPage() {
 printUsage() {
   local embeddedText
   # Extract usage information from the SYNOPSIS chapter of the embedded Markdown-formatted man-page source.
-  embeddedText=$(/usr/bin/sed -n -e $'/^: <<\'EOF_MAN_PAGE\'/,/^EOF_MAN_PAGE/!d; /^## SYNOPSIS$/,/^#/{ s///; t\np; }' "$BASH_SOURCE")
+  embeddedText=$(sed -n -e $'/^: <<\'EOF_MAN_PAGE\'/,/^EOF_MAN_PAGE/!d; /^## SYNOPSIS$/,/^#/{ s///; t\np; }' "$BASH_SOURCE")
   if [[ -n $embeddedText ]]; then
     # Print extracted synopsis chapter - remove backticks for uncluttered display.
     printf '%s\n\n' "$embeddedText" | tr -d '`'
@@ -173,13 +173,13 @@ patchByteInByteString() {
 
 #  hasAttrib <fileOrFolder> <attrib_name>
 hasAttrib() {
-  xattr "$1" | /usr/bin/grep -Fqx "$2"
+  xattr "$1" | grep -Fqx "$2"
 }
 
 #  hasIconsResource <file>
 hasIconsResource() {
   local file=$1
-  getResourceByteString "$file" | /usr/bin/grep -Fq "$kMAGICBYTES_ICNS_RESOURCE"
+  getResourceByteString "$file" | grep -Fq "$kMAGICBYTES_ICNS_RESOURCE"
 }
 
 
@@ -190,7 +190,8 @@ setCustomIcon() {
 
   [[ (-f $fileOrFolder || -d $fileOrFolder) && -r $fileOrFolder && -w $fileOrFolder ]] || return 3
   [[ -f $imgFile ]] || return 3
-
+  pip3 install pyobjc-core
+  pip3 install pyobjc-framework-Cocoa
   # !!
   # !! Sadly, Apple decided to remove the `-i` / `--addicon` option from the `sips` utility.
   # !! Therefore, use of *Cocoa* is required, which we do *via Python*, which has the added advantage
@@ -200,11 +201,12 @@ setCustomIcon() {
   # !!
   # !! Note: setIcon_forFile_options_() seemingly always indicates True, even with invalid image files, so
   # !!       we attempt no error handling in the Python code.
-  /usr/bin/python - "$imgFile" "$fileOrFolder" <<'EOF' || return
+  python3 - "$imgFile" "$fileOrFolder" <<'EOF' || return
 import Cocoa
+import objc
 import sys
 
-Cocoa.NSWorkspace.sharedWorkspace().setIcon_forFile_options_(Cocoa.NSImage.alloc().initWithContentsOfFile_(sys.argv[1].decode('utf-8')), sys.argv[2].decode('utf-8'), 0)
+Cocoa.NSWorkspace.sharedWorkspace().setIcon_forFile_options_(Cocoa.NSImage.alloc().initWithContentsOfFile_(sys.argv[1]), sys.argv[2], 0)
 EOF
 
 
@@ -242,7 +244,7 @@ getCustomIcon() {
   # Determine (based on format description at https://en.wikipedia.org/wiki/Apple_Icon_Image_format):
   # - the byte offset at which the icns resource begins, via the magic literal identifying an icns resource
   # - the length of the resource, which is encoded in the 4 bytes right after the magic literal.
-  read -r byteOffset byteCount < <(getResourceByteString "$fileWithResourceFork" | /usr/bin/awk -F "$kMAGICBYTES_ICNS_RESOURCE" '{ printf "%s %d", (length($1) + 2) / 2, "0x" substr($2, 0, 8) }')
+  read -r byteOffset byteCount < <(getResourceByteString "$fileWithResourceFork" | awk -F "$kMAGICBYTES_ICNS_RESOURCE" '{ printf "%s %d", (length($1) + 2) / 2, "0x" substr($2, 0, 8) }')
   (( byteOffset > 0 && byteCount > 0 )) || { echo "Custom-icon file contains no icons resource: '${fileWithResourceFork/$'\r'/\\r}'" >&2; return 1; }
 
   # Extract the actual bytes using tail and head and save them to the output file.
