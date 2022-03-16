@@ -14,7 +14,7 @@
 
 kTHIS_NAME=${BASH_SOURCE##*/}
 kTHIS_HOMEPAGE='https://github.com/mklement0/fileicon'
-kTHIS_VERSION='v0.2.4' # NOTE: This assignment is automatically updated by `make version VER=<newVer>` - DO keep the 'v' prefix.
+kTHIS_VERSION='v0.3.0' # NOTE: This assignment is automatically updated by `make version VER=<newVer>` - DO keep the 'v' prefix.
 
 unset CDPATH  # To prevent unpredictable `cd` behavior.
 
@@ -190,8 +190,6 @@ setCustomIcon() {
 
   [[ (-f $fileOrFolder || -d $fileOrFolder) && -r $fileOrFolder && -w $fileOrFolder ]] || return 3
   [[ -f $imgFile ]] || return 3
-  pip3 install pyobjc-core
-  pip3 install pyobjc-framework-Cocoa
   # !!
   # !! Sadly, Apple decided to remove the `-i` / `--addicon` option from the `sips` utility.
   # !! Therefore, use of *Cocoa* is required, which we do *via Python*, which has the added advantage
