@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2015-2019 Michael Klement mklement0@gmail.com (http://same2u.net), released under the MIT license.
-
 ###
 # Home page: https://github.com/mklement0/fileicon
 # Author:   Michael Klement <mklement0@gmail.com> (http://same2u.net)
@@ -14,7 +12,7 @@
 
 kTHIS_NAME=${BASH_SOURCE##*/}
 kTHIS_HOMEPAGE='https://github.com/mklement0/fileicon'
-kTHIS_VERSION='v0.2.4' # NOTE: This assignment is automatically updated by `make version VER=<newVer>` - DO keep the 'v' prefix.
+kTHIS_VERSION='v0.3.0' # NOTE: This assignment is automatically updated by `make version VER=<newVer>` - DO keep the 'v' prefix.
 
 unset CDPATH  # To prevent unpredictable `cd` behavior.
 
@@ -87,7 +85,7 @@ printUsage() {
 case $1 in
   --version)
     # Output version number and exit, if requested.
-    ver="v0.2.4"; echo "$kTHIS_NAME $kTHIS_VERSION"$'\nFor license information and more, visit '"$kTHIS_HOMEPAGE"; exit 0
+    ver="v0.3.0"; echo "$kTHIS_NAME $kTHIS_VERSION"$'\nFor license information and more, visit '"$kTHIS_HOMEPAGE"; exit 0
     ;;
   -h|--help)
     # Print usage information and exit.
@@ -124,9 +122,11 @@ getAttribByteString() {
 
 # Outputs the specified file's RESOURCE FORK as a byte string (a hex dump that is a single-line string of pairs of hex digits, without separators or line breaks, such as "000a2c".
 # IMPORTANT: Hex. digits > 9 use *lowercase* characters.
-# Note: This function relies on `xxd -p <file>/..namedfork/rsrc | tr -d '\n'` rather than the conceptually equivalent `getAttributeByteString <file> com.apple.ResourceFork`
-#       for PERFORMANCE reasons: getAttributeByteString() relies on `xattr`, which is a *Python* script and therefore quite slow due to Python's startup cost.
-#   getAttribByteString <file>
+# Note: This function relies on `xxd -p <file>/..namedfork/rsrc | tr -d '\n'` rather than the conceptually equivalent call,
+#       `getAttribByteString <file> com.apple.ResourceFork`, for PERFORMANCE reasons: 
+#       getAttribByteString() (defined above) relies on `xattr`, which is a *Python* script [!! seemingly no longer, as of macOS 10.16] 
+#       and therefore quite slow due to Python's startup cost.
+#   getResourceByteString <file>
 getResourceByteString() {
   xxd -p "$1"/..namedfork/rsrc | tr -d '\n'
 }
@@ -200,13 +200,59 @@ setCustomIcon() {
   # !!
   # !! Note: setIcon_forFile_options_() seemingly always indicates True, even with invalid image files, so
   # !!       we attempt no error handling in the Python code.
-  /usr/bin/python - "$imgFile" "$fileOrFolder" <<'EOF' || return
-import Cocoa
-import sys
 
+  # macOS versions <= 12.2: 
+  #  * Use the 2.x system python, which comes with the pyobjc packages preinstalled.
+  if [[ -x /usr/bin/python && -z $__FILEICON_USEPY3 ]]; then
+
+    /usr/bin/python - "$imgFile" "$fileOrFolder" <<'EOF' || return
+import sys, Cocoa
 Cocoa.NSWorkspace.sharedWorkspace().setIcon_forFile_options_(Cocoa.NSImage.alloc().initWithContentsOfFile_(sys.argv[1].decode('utf-8')), sys.argv[2].decode('utf-8'), 0)
 EOF
+  # macOS versions >= 12.3, where the v2.x /usr/bin/python has been removed, or
+  # if Python 3 is explicitly requested via a non-empty $__FILEICON_USEPY3 env. var: 
+  #  * Use the first `python3` in the $PATH, which by default is the STUB at
+  #    /usr/bin/python3 that triggers a download-on-demand prompt as part of the
+  #    Xcode command-line tools. 
+  #    For users that have a Homebrew 3.x Python installation, *it* will be used,
+  #    assuming its binary comes *first* in $PATH.
+  else
 
+    local done=0 retrying=0 output 
+    while (( ! done )); do
+      # Note: The only difference to the v2.x Python code above is the removal of the .decode('utf-8') 
+      #       calls, which are no longer necessary in v3.x.
+      output="$(python3 - "$imgFile" "$fileOrFolder" 2>&1 <<'EOF'
+import sys, Cocoa
+Cocoa.NSWorkspace.sharedWorkspace().setIcon_forFile_options_(Cocoa.NSImage.alloc().initWithContentsOfFile_(sys.argv[1]), sys.argv[2], 0)
+EOF
+      )"
+      local ec=$? packageNames='pyobjc-core pyobjc-framework-Cocoa'
+      done=1
+      if (( ec )); then # The call failed.
+        (( retrying )) && die "An unexpected error occured: $output" # Even on-demand pyobjc installation failed -> abort.
+        # First, make sure that `python3` is actually Python, and not just the *stub* executable.
+        python3 --version | /usr/bin/grep -q ' 3.' || die "The 'python3' binary in your path is not functional, presumably because it is the preinstalled stub at /usr/bin/python3 that triggers a prompt for on-demand installation. Perform this installation, or, if you have Homebrew installed, install Python 3 with \`brew install python@3\`"
+        # Assume that the problem is the absence of the required pyobjc-* packages; attempt installation now.
+        # Tips for debugging:
+        #  * To exercise this function, from the repo dir.:
+        #      touch /tmp/tf; ./bin/fileicon set /tmp/tf ./test/.fixtures/img.png
+        #  * To manage packages; prepend `sudo -H` to see machine-level packages
+        #      pip3 list -v                                          # shows installed packages and their locations
+        #      pip3 uninstall -y pyobjc-core pyobjc-framework-Cocoa  # uninstalls the required pyobjc-* packages
+        #  * To manage pip3's package *cache*
+        #      pip3 cache list   # list cached packages
+        #      pip3 cache purge  # clear cache
+        #      pip config set global.cache-dir false   # disable cache globally
+        #      pip config unset global.cache-dir       # re-enable globacl cache
+        echo "Performing one-time user-level installation of required Python packages: $packageNames - this can take while..." >&2
+        pip3 install -q --user $packageNames || die "On-demand installation of Python packages failed unexpectedly."
+        done=0 retrying=1 # Retry
+      fi
+
+    done
+
+  fi
 
   # Verify that a resource fork with icons was actually created.
   # For *files*, the resource fork is embedded in the file itself.
