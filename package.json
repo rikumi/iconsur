@@ -14,10 +14,10 @@
   },
   "dependencies": {
     "commander": "^6.0.0",
+    "cross-fetch": "^3.1.5",
     "glob": "^7.1.6",
     "icns-lib": "^1.0.1",
     "jimp": "^0.14.0",
-    "node-fetch": "^3.1.1",
     "plist": "^3.0.5"
   },
   "devDependencies": {

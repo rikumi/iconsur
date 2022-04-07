@@ -9,7 +9,7 @@ const jimp = require('jimp');
 const plist = require('plist');
 const icns = require('icns-lib');
 const { program } = require('commander');
-const { default: fetch } = require('node-fetch');
+const { default: fetch } = require('cross-fetch');
 
 const jpeg = require('./openjpeg');
 const { version } = require('../package.json');
@@ -61,18 +61,18 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
       console.error(`${appDir}: No such directory`);
       process.exit(1);
     }
-    
+
     if (!appDir.endsWith('.app')) {
       console.error(`${appDir}: Not an App directory`);
       process.exit(1);
     }
-    
+
     let appName = program.keyword;
     let srcIconFile = program.input;
     if (program.input) {
       program.local = true;
     }
-    
+
     try {
       const infoPlist = path.join(appDir, 'Contents/Info.plist');
 
@@ -102,7 +102,7 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
         srcIconFile = path.resolve(appDir, 'Contents/Resources/AppIcon.icns');
       }
     }
-    
+
     const imageSize = 1024;
     const iconPadding = 100;
     const iconSize = imageSize - 2 * iconPadding;
@@ -110,13 +110,13 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
     const region = program.region || 'us';
     let resultIcon;
     let data = null;
-  
+
     if (!program.local) {
       console.log(`Searching iOS App with name: ${appName}`);
       const res = await fetch(`https://itunes.apple.com/search?media=software&entity=software%2CiPadSoftware&term=${encodeURIComponent(appName)}&country=${region}&limit=1`);
       data = await res.json();
     }
-  
+
     if (data && data.results && data.results.length) {
       const app = data.results[0];
       const appName = app.trackName;
@@ -136,7 +136,7 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
         console.error(`Cannot find icon at ${srcIconFile}`);
         process.exit(1);
       }
-      
+
       let iconBuffer = fs.readFileSync(srcIconFile);
 
       try {
@@ -144,12 +144,12 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
           .filter(([k]) => icns.isImageType(k))
           .map(([, v]) => v)
           .sort((a, b) => b.length - a.length)[0];
-        
+
         if (subIconBuffer) {
           iconBuffer = subIconBuffer;
         }
-      } catch (e) {}
-      
+      } catch (e) { }
+
       let originalIcon;
       try {
         originalIcon = await jimp.read(iconBuffer);
@@ -172,7 +172,7 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
       const scalePosition = iconSize * (1 - originalIconScaleSize) / 2;
       resultIcon = (await jimp.create(iconSize, iconSize)).composite(originalIcon, scalePosition, scalePosition);
     }
-  
+
     const image = (await jimp.create(imageSize, imageSize, program.color || '#ffffff')).composite(resultIcon, iconPadding, iconPadding);
 
     // The masking algorithm that is both alpha- and color-friendly and full of magic
@@ -187,7 +187,7 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
     } else {
       const tmpFile = path.resolve(os.tmpdir(), `tmp-${Math.random().toFixed(16).substr(2, 6)}.png`);
       await image.writeAsync(tmpFile);
-    
+
       await fileiconBinaryReady;
       const { status } = cp.spawnSync(fileicon, ['set', appDir, tmpFile], { stdio: 'inherit' });
       if (status) {
@@ -218,23 +218,23 @@ program.command('cache').action(() => {
   try {
     cp.execSync('sudo rm -rf /Library/Caches/com.apple.iconservices.store', { stdio: 'ignore' });
   } catch (e) { }
-  
+
   try {
     cp.execSync('sudo find /private/var/folders/ \\( -name com.apple.dock.iconcache -or -name com.apple.iconservices \\) -exec rm -rf {} \\;', { stdio: 'ignore' });
   } catch (e) { }
-  
+
   try {
     cp.execSync('sleep 3; sudo touch /Applications/*', { stdio: 'ignore' });
   } catch (e) { }
-  
+
   try {
     cp.execSync('killall Dock', { stdio: 'ignore' });
   } catch (e) { }
-  
+
   try {
     cp.execSync('killall Finder', { stdio: 'ignore' });
   } catch (e) { }
-  
+
   process.exit();
 });
 
