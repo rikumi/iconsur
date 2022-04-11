@@ -160,7 +160,7 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
         process.exit(1);
       }
 
-      const scale = program.scale ? '1.0' : program.scale ?? '0.9'
+      const scale = program.plain ? '1.0' : program.scale ?? '0.9'
       let originalIconScaleSize;
       if (originalIcon.hasAlpha()) {
         originalIconScaleSize = parseFloat(scale);
