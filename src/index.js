@@ -46,6 +46,7 @@ program.option('-r, --region <region>', 'Specify country or region to search (de
 program.option('-s, --scale <float>', 'Specify scale for adaptive icon (default: 0.9)');
 program.option('-c, --color <hex>', 'Specify color for adaptive icon (default: ffffff)');
 program.option('-i, --input <path>', 'Specify custom input image for adaptive icon');
+program.option('-p, --plain', 'Don\'t apply masking, scaling, padding and background to the icon by default');
 program.option('-o, --output <path>', 'Write the generated icon to a file without actually applying to App');
 
 program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
@@ -104,7 +105,7 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
     }
 
     const imageSize = 1024;
-    const iconPadding = 100;
+    const iconPadding = program.plain ? 0 : 100;
     const iconSize = imageSize - 2 * iconPadding;
     const mask = (await jimp.read(path.join(__dirname, 'mask.png'))).resize(imageSize, imageSize);
     const region = program.region || 'us';
@@ -159,9 +160,10 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
         process.exit(1);
       }
 
+      const scale = program.scale || (program.plain ? '1.0' : '0.9')
       let originalIconScaleSize;
       if (originalIcon.hasAlpha()) {
-        originalIconScaleSize = parseFloat(program.scale || '0.9');
+        originalIconScaleSize = parseFloat(scale);
         originalIcon.contain(iconSize * originalIconScaleSize, iconSize * originalIconScaleSize);
       } else {
         console.log('The original icon image is opaque; thus it will not be scaled down.')
@@ -173,12 +175,15 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
       resultIcon = (await jimp.create(iconSize, iconSize)).composite(originalIcon, scalePosition, scalePosition);
     }
 
-    const image = (await jimp.create(imageSize, imageSize, program.color || '#ffffff')).composite(resultIcon, iconPadding, iconPadding);
+    const color = program.color || (program.plain ? '#00000000' : '#ffffff')
+    const image = (await jimp.create(imageSize, imageSize, color)).composite(resultIcon, iconPadding, iconPadding);
 
-    // The masking algorithm that is both alpha- and color-friendly and full of magic
-    image.scan(0, 0, imageSize, imageSize, (x, y) => {
-      image.setPixelColor((mask.getPixelColor(x, y) & image.getPixelColor(x, y)) >>> 0, x, y);
-    });
+    if (!program.plain) {
+        // The masking algorithm that is both alpha- and color-friendly and full of magic
+        image.scan(0, 0, imageSize, imageSize, (x, y) => {
+            image.setPixelColor((mask.getPixelColor(x, y) & image.getPixelColor(x, y)) >>> 0, x, y);
+        });
+    }
 
     if (program.output) {
       program.output = String(program.output).replace(/(\..*)?$/, '.png');
