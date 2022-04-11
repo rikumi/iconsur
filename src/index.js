@@ -46,7 +46,7 @@ program.option('-r, --region <region>', 'Specify country or region to search (de
 program.option('-s, --scale <float>', 'Specify scale for adaptive icon (default: 0.9)');
 program.option('-c, --color <hex>', 'Specify color for adaptive icon (default: ffffff)');
 program.option('-i, --input <path>', 'Specify custom input image for adaptive icon');
-program.option('-p, --plain', 'Don\'t apply masking, scaling, padding and background to the icon');
+program.option('-p, --plain', 'Don\'t apply masking, scaling, padding and background to the icon by default');
 program.option('-o, --output <path>', 'Write the generated icon to a file without actually applying to App');
 
 program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
@@ -160,7 +160,7 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
         process.exit(1);
       }
 
-      const scale = program.plain ? '1.0' : program.scale ?? '0.9'
+      const scale = program.scale || (program.plain ? '1.0' : '0.9')
       let originalIconScaleSize;
       if (originalIcon.hasAlpha()) {
         originalIconScaleSize = parseFloat(scale);
@@ -175,7 +175,7 @@ program.command('set <dir> [otherDirs...]').action(async (dir, otherDirs) => {
       resultIcon = (await jimp.create(iconSize, iconSize)).composite(originalIcon, scalePosition, scalePosition);
     }
 
-    const color = program.plain ? '#00000000' : program.color ?? '#ffffff'
+    const color = program.color || (program.plain ? '#00000000' : '#ffffff')
     const image = (await jimp.create(imageSize, imageSize, color)).composite(resultIcon, iconPadding, iconPadding);
 
     if (!program.plain) {
